@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Рецепти{% endblock %}
+{% block content %}
+  <div class="d-flex justify-content-between mb-3">
+    <h1>Рецепти</h1>
+    <a class="btn btn-primary" href="{% url 'recipes:create' %}">Нова рецепта</a>
+  </div>
+  <ul class="list-group">
+    {% for r in object_list %}
+      <li class="list-group-item">
+        <a href="{% url 'recipes:detail' slug=r.slug %}">{{ r.title }}</a>
+      </li>
+    {% empty %}
+      <li class="list-group-item">Няма рецепти.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

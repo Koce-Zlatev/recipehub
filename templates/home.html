@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Начало{% endblock %}
+{% block content %}
+  <h1>Добре дошъл в Recipe Hub!</h1>
+  <p>Това е началната страница.</p>
+  <a href="{% url 'recipes:list' %}" class="btn btn-primary">Виж всички рецепти</a>
+{% endblock %}
