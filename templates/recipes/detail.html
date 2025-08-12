@@ -2,6 +2,65 @@
 {% block title %}{{ object.title }}{% endblock %}
 {% block content %}
   <h1>{{ object.title }}</h1>
+
+  {% if request.user.is_authenticated %}
+    {% if request.user == object.owner or request.user.is_staff %}
+      <div class="mb-3">
+        <a class="btn btn-outline-primary" href="{% url 'recipes:edit' slug=object.slug %}">Редактирай</a>
+        <a class="btn btn-outline-danger" href="{% url 'recipes:delete' slug=object.slug %}">Изтрий</a>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <p class="text-muted mb-2">Любими: {{ favorites_count }}</p>
+  {% if request.user.is_authenticated %}
+    <form method="post" action="{% url 'recipes:favorite' slug=object.slug %}" class="mb-3">
+      {% csrf_token %}
+      {% if is_favorite %}
+        <button class="btn btn-warning" type="submit">Премахни от любими</button>
+      {% else %}
+        <button class="btn btn-outline-warning" type="submit">Добави в любими</button>
+      {% endif %}
+    </form>
+  {% endif %}
+
   <p>{{ object.description }}</p>
   <pre>{{ object.steps }}</pre>
+
+  <hr>
+    
+  <h4 class="mt-4">Коментари</h4>
+<ul class="list-group mb-3">
+  {% for c in comments %}
+    <li class="list-group-item">
+      <div class="d-flex justify-content-between">
+        <div>
+          <strong>{{ c.author.username }}</strong>
+          <small class="text-muted"> · {{ c.created_at|date:"d.m.Y H:i" }}</small>
+        </div>
+        {% if request.user.is_authenticated %}
+          {% if request.user == c.author or request.user.is_staff %}
+            <form method="post" action="{% url 'recipes:del_comment' slug=object.slug pk=c.id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger">Изтрий</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </div>
+      <div class="mt-2">{{ c.content }}</div>
+    </li>
+  {% empty %}
+    <li class="list-group-item">Няма коментари.</li>
+  {% endfor %}
+</ul>
+
+{% if request.user.is_authenticated %}
+  <form method="post" action="{% url 'recipes:add_comment' slug=object.slug %}">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button class="btn btn-primary">Публикувай</button>
+  </form>
+{% else %}
+  <p><a href="{% url 'login' %}">Влез</a>, за да оставиш коментар.</p>
+{% endif %}
 {% endblock %}

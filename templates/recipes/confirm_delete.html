@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Изтриване: {{ object.title }}{% endblock %}
+{% block content %}
+  <h1>Изтриване</h1>
+  <p>Сигурен ли си, че искаш да изтриеш <strong>{{ object.title }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <a href="{{ object.get_absolute_url }}" class="btn btn-secondary">Отказ</a>
+    <button class="btn btn-danger" type="submit">Изтрий</button>
+  </form>
+{% endblock %}
