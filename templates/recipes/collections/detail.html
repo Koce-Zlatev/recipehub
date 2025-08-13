@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ object.name }}{% endblock %}
+{% block content %}
+  <h1>{{ object.name }}</h1>
+  {% if object.description %}<p class="text-muted">{{ object.description }}</p>{% endif %}
+
+  <h5 class="mt-4">Добави рецепта</h5>
+  <form method="post" action="{% url 'recipes:collection-add' pk=object.pk %}" class="mb-3">
+    {% csrf_token %}
+    {{ add_form.as_p }}
+    <button class="btn btn-outline-primary">Добави</button>
+  </form>
+
+  <h5>Рецепти в колекцията</h5>
+  <ul class="list-group">
+  {% for it in items %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <a href="{{ it.recipe.get_absolute_url }}">{{ it.recipe.title }}</a>
+      <form method="post" action="{% url 'recipes:collection-remove' pk=object.pk item_id=it.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-sm btn-outline-danger">Премахни</button>
+      </form>
+    </li>
+  {% empty %}
+    <li class="list-group-item">Няма рецепти в тази колекция.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

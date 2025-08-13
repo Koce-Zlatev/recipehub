@@ -1,8 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Профил{% endblock %}
 {% block content %}
-<h1>Профил</h1>
+<h1 class="mb-3 d-flex align-items-center justify-content-between">
+  <span>Профил</span>
+  <a class="btn btn-sm btn-outline-secondary" href="{% url 'edit_profile' %}">Редактирай профил</a>
+</h1>
+
 <p><strong>Потребител:</strong> {{ request.user.username }}</p>
 <p><strong>Име за показване:</strong> {{ profile.display_name }}</p>
 <p><strong>Био:</strong> {{ profile.bio|default:"(няма)" }}</p>
+
+<hr>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Любими</h5>
+        <p class="card-text">Общо: {{ fav_count }}</p>
+        <a class="btn btn-sm btn-outline-primary" href="{% url 'favorites' %}">Виж любими</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Колекции</h5>
+        <p class="card-text">Общо: {{ collections_count }}</p>
+        <a class="btn btn-sm btn-outline-primary" href="{% url 'recipes:collections' %}">Моите колекции</a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

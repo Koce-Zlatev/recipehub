@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Category, Ingredient, Recipe, RecipeIngredient, Comment, Favorite
+from .models import (
+    Category, Ingredient, Recipe, RecipeIngredient,
+    Comment, Favorite,
+    Collection, CollectionItem,
+)
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
@@ -13,6 +17,16 @@ class RecipeAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     prepopulated_fields = {"slug": ("title",)}
     inlines = [RecipeIngredientInline]
+
+class CollectionItemInline(admin.TabularInline):
+    model = CollectionItem
+    extra = 0
+
+@admin.register(Collection)
+class CollectionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'owner')
+    search_fields = ('name', 'owner__username')
+    inlines = [CollectionItemInline]
 
 admin.site.register(Category)
 admin.site.register(Ingredient)

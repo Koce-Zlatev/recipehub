@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Нова колекция{% endblock %}
+{% block content %}
+  <h1>Нова колекция</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-success">Запази</button>
+  </form>
+{% endblock %}

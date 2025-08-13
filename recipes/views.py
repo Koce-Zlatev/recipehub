@@ -5,9 +5,15 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from .models import Recipe, Favorite, Comment
-from .forms import RecipeForm, CommentForm
 
+from .models import (
+    Recipe, Favorite, Comment,
+    Collection, CollectionItem,
+)
+from .forms import (
+    RecipeForm, CommentForm,
+    CollectionForm, AddRecipeToCollectionForm,
+)
 
 class RecipeListView(ListView):
     model = Recipe
@@ -24,10 +30,8 @@ class RecipeDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         user = self.request.user
         recipe = self.object
-        # Favorites
         ctx['favorites_count'] = recipe.favorites.count()
         ctx['is_favorite'] = user.is_authenticated and recipe.favorites.filter(user=user).exists()
-        # Comments
         ctx['comments'] = recipe.comments.select_related('author').order_by('-created_at')
         ctx['comment_form'] = CommentForm()
         return ctx
@@ -87,9 +91,6 @@ def toggle_favorite(request, slug):
         messages.success(request, 'Добавено в любими!')
     return redirect('recipes:detail', slug=slug)
 
-
-# ===== Коментари =====
-
 @require_POST
 @login_required
 def add_comment(request, slug):
@@ -117,3 +118,66 @@ def delete_comment(request, slug, pk):
     else:
         messages.error(request, 'Нямате права да изтриете този коментар.')
     return redirect('recipes:detail', slug=slug)
+
+
+class CollectionListView(LoginRequiredMixin, ListView):
+    model = Collection
+    template_name = 'recipes/collections/list.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Collection.objects.filter(owner=self.request.user).order_by('name')
+
+
+class CollectionCreateView(LoginRequiredMixin, CreateView):
+    model = Collection
+    form_class = CollectionForm
+    template_name = 'recipes/collections/form.html'
+    success_url = reverse_lazy('recipes:collections')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+
+        name = form.cleaned_data.get('name', '').strip()
+        if Collection.objects.filter(owner=self.request.user, name=name).exists():
+            form.add_error('name', 'Вече имате колекция с това име.')
+            return self.form_invalid(form)
+
+        messages.success(self.request, 'Колекцията е създадена!')
+        return super().form_valid(form)
+
+
+class CollectionDetailView(LoginRequiredMixin, DetailView):
+    model = Collection
+    template_name = 'recipes/collections/detail.html'
+
+    def get_queryset(self):
+        return Collection.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['add_form'] = AddRecipeToCollectionForm()
+        ctx['items'] = self.object.items.select_related('recipe').order_by('recipe__title')
+        return ctx
+
+
+@login_required
+def add_to_collection(request, pk):
+    collection = get_object_or_404(Collection, pk=pk, owner=request.user)
+    if request.method == 'POST':
+        form = AddRecipeToCollectionForm(request.POST)
+        if form.is_valid():
+            recipe = form.cleaned_data['recipe']
+            CollectionItem.objects.get_or_create(collection=collection, recipe=recipe)
+            messages.success(request, 'Рецептата е добавена в колекцията.')
+    return redirect('recipes:collection-detail', pk=pk)
+
+
+@login_required
+def remove_from_collection(request, pk, item_id):
+    collection = get_object_or_404(Collection, pk=pk, owner=request.user)
+    item = get_object_or_404(CollectionItem, pk=item_id, collection=collection)
+    if request.method == 'POST':
+        item.delete()
+        messages.info(request, 'Рецептата е премахната от колекцията.')
+    return redirect('recipes:collection-detail', pk=pk)

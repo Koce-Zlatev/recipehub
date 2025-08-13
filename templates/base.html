@@ -20,9 +20,10 @@
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="{% url 'recipes:list' %}">Рецепти</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">За нас</a></li>
-          {% if request.user.is_authenticated %}
-              <li class="nav-item"><a class="nav-link" href="{% url 'favorites' %}">Любими</a></li>
-          {% endif %}
+        {% if request.user.is_authenticated %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'favorites' %}">Любими</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'recipes:collections' %}">Колекции</a></li>
+        {% endif %}
       </ul>
 
       <ul class="navbar-nav ms-auto">
@@ -34,7 +35,7 @@
              <form class="d-inline" method="post" action="{% url 'logout' %}">
                  {% csrf_token %}
                  <button class="btn btn-sm btn-outline-light ms-2" type="submit">Изход</button>
-                 </form>
+             </form>
           </li>
         {% else %}
           <li class="nav-item">

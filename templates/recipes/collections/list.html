@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Моите колекции{% endblock %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="m-0">Моите колекции</h1>
+    <a class="btn btn-primary" href="{% url 'recipes:collection-create' %}">Нова колекция</a>
+  </div>
+  <ul class="list-group">
+    {% for col in object_list %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="{% url 'recipes:collection-detail' pk=col.pk %}">{{ col.name }}</a>
+        <small class="text-muted">{{ col.items.count }} рецепти</small>
+      </li>
+    {% empty %}
+      <li class="list-group-item">Нямаш колекции.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

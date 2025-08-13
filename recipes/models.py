@@ -53,3 +53,26 @@ class Favorite(TimeStamped):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='favorites')
     class Meta:
         unique_together = ('user', 'recipe')
+
+class Collection(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='collections')
+    name = models.CharField(max_length=80)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('owner', 'name')
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.owner})"
+
+class CollectionItem(models.Model):
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='items')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='in_collections')
+
+    class Meta:
+        unique_together = ('collection', 'recipe')
+        ordering = ['recipe__title']
+
+    def __str__(self):
+        return f"{self.collection.name} -> {self.recipe.title}"
